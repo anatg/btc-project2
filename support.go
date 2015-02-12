@@ -1,8 +1,10 @@
-// These functions have been shamelessly taken from https://github.com/btcsuite/btcd/blob/master/mining.go
+// Some of these functions have been shamelessly taken from https://github.com/btcsuite/btcd/blob/master/mining.go
 
 package main
 
 import (
+	"bytes"
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -20,7 +22,7 @@ import (
 )
 
 // setupRpcClient handles establishing a connection to the pointcoind using
-// the provided parameters. The function will throw an error if the full node
+// the provided parameters. The function will cease an error if the full node
 // is not running.
 func setupRpcClient(cfile string, rpcuser string, rpcpass string) *btcrpcclient.Client {
 	// Get the raw bytes of the certificate required by the rpcclient.
@@ -78,9 +80,6 @@ func standardCoinbaseScript(nextBlockHeight int64, extraNonce uint64, msg string
 // createCoinbaseTx returns a coinbase transaction paying an appropriate subsidy
 // based on the passed block height to the provided address.  When the address
 // is nil, the coinbase transaction will instead be redeemable by anyone.
-//
-// See the comment for NewBlockTemplate in  for more information about why the nil
-// address handling is useful.
 func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int64, addr btcutil.Address) (*btcutil.Tx, error) {
 	// Create the script to pay to the provided payment address if one was
 	// specified.  Otherwise create a script that allows the coinbase to be
@@ -118,7 +117,8 @@ func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int64, addr btcutil
 	return btcutil.NewTx(tx), nil
 }
 
-//
+// Creates a coinbase transaction from the next block height, a funding address,
+// and an optional (short) message. The message can be whatever you want actually.
 func CreateCoinbaseTx(nextBlockHeight int64, a string, msg string) *btcutil.Tx {
 	n := uint64(rand.Uint32())
 	script, err := standardCoinbaseScript(nextBlockHeight, n, msg)
@@ -128,7 +128,7 @@ func CreateCoinbaseTx(nextBlockHeight int64, a string, msg string) *btcutil.Tx {
 	}
 	addr, err := btcutil.DecodeAddress(a, &btcnet.MainNetParams)
 	if err != nil {
-		s := fmt.Sprintf("CreateCoinbaseTx failed with: %s\n", err)
+		s := fmt.Sprintf("Decoding the provided address failed with: %s\n", err)
 		log.Fatal(s)
 	}
 
@@ -156,7 +156,15 @@ func formatDiff(bits string) big.Int {
 // formatTransactions converts a list of btcjson transactions into btcwire transactions
 // so that we can use them in a new block.
 func formatTransactions(txs []btcjson.GetBlockTemplateResultTx) []*btcwire.MsgTx {
+
 	msgtxs := []*btcwire.MsgTx{}
+	for _, tx := range txs {
+		d, _ := hex.DecodeString(tx.Data)
+		msgtx := btcwire.NewMsgTx()
+		msgtx.Deserialize(bytes.NewBuffer(d))
+		msgtxs = append(msgtxs, msgtx)
+	}
+
 	return msgtxs
 }
 
