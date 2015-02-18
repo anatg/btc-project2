@@ -63,9 +63,7 @@ func main() {
 		var nonce uint32 = 0
 
 		block := CreateBlock(prevHash, merkleRoot, difficulty, nonce, txs)
-
-		for {
-
+		for i :=0; i < 1000000; i++ {
 			sha, _ = block.Header.BlockSha()
 			fmt.Println(block.Header.nonce)
 
@@ -78,6 +76,6 @@ func main() {
 				block.Header.nonce += 1
 			}
 		}
-
+		
 	}
 }
