@@ -10,22 +10,17 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"math/big"
-	"math/rand"
 
 	"github.com/PointCoin/btcjson"
-	"github.com/PointCoin/btcutil"
-	"github.com/PointCoin/pointcoind/blockchain"
 )
 
 const (
 	// This should match your settings in pointcoind.conf
-	rpcuser = "[your username]"
-	rpcpass = "[your password]"
+	rpcuser = "anat"
+	rpcpass = "ag3pk"
 	// This file should exist if pointcoind was setup correctly
-	cert    = "/home/ubuntu/.pointcoind/rpc.cert"
+	cert = "/home/ubuntu/.pointcoind/rpc.cert"
 )
 
 func main() {
@@ -40,7 +35,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		// The template returned by GetBlockTemplate provides these fields that 
+		// The template returned by GetBlockTemplate provides these fields that
 		// you will need to use to create a new block:
 
 		// The hash of the previous block
@@ -52,12 +47,12 @@ func main() {
 		// The height of the next block (number of blocks between genesis block and next block)
 		height := template.Height
 
-		// The transactions from the network	
-		txs := formatTransactions(template.Transactions) 
+		// The transactions from the network
+		txs := formatTransactions(template.Transactions)
 
 		// These are configurable parameters to the coinbase transaction
-		msg := "Your computing ID" // replace with your UVa Computing ID (e.g., "dee2b")
-		a := "PsVSrUSQf72X6GWFQXJPxR7WSAPVRb1gWx" // replace with the address you want mining fees to go to (or leave it like this and Nick gets them)
+		msg := "ag3pk"                            // replace with your UVa Computing ID (e.g., "dee2b")
+		a := "1BBaHw47KN19T6e6oY8TcZuxNsJJuu3uLb" // replace with the address you want mining fees to go to (or leave it like this and Nick gets them)
 
 		coinbaseTx := CreateCoinbaseTx(height, a, msg)
 
@@ -65,8 +60,24 @@ func main() {
 		merkleRoot := createMerkleRoot(txs)
 
 		// Finish the miner!
+		var nonce uint32 = 0
 
-		//block := CreateBlock(prevHash, merkleRoot, difficulty, nonce, txs)
+		block := CreateBlock(prevHash, merkleRoot, difficulty, nonce, txs)
+
+		for {
+
+			sha, _ = block.Header.BlockSha()
+			fmt.Println(block.Header.nonce)
+
+			if lessThanDiff(sha, difficulty) {
+				fmt.Println("valid hash")
+				err := client.SubmitBlock(btcutil.NewBlock(block), nil)
+				break
+			}
+			else {
+				block.Header.nonce += 1
+			}
+		}
 
 	}
 }
