@@ -52,7 +52,7 @@ func main() {
 
 		// These are configurable parameters to the coinbase transaction
 		msg := "ag3pk"                            // replace with your UVa Computing ID (e.g., "dee2b")
-		a := "1BBaHw47KN19T6e6oY8TcZuxNsJJuu3uLb" // replace with the address you want mining fees to go to (or leave it like this and Nick gets them)
+		a := "PYwk4qyj9MxoRMfBJLyGBJw4gRGbsrb4rx" // replace with the address you want mining fees to go to (or leave it like this and Nick gets them)
 
 		coinbaseTx := CreateCoinbaseTx(height, a, msg)
 
@@ -76,6 +76,6 @@ func main() {
 				block.Header.nonce += 1
 			}
 		}
-		
+
 	}
 }
