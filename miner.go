@@ -11,7 +11,8 @@ package main
 
 import (
 	"log"
-
+	"fmt"
+	"github.com/PointCoin/btcutil"
 	"github.com/PointCoin/btcjson"
 )
 
@@ -63,17 +64,15 @@ func main() {
 		var nonce uint32 = 0
 
 		block := CreateBlock(prevHash, merkleRoot, difficulty, nonce, txs)
-		for i :=0; i < 1000000; i++ {
-			sha, _ = block.Header.BlockSha()
-			fmt.Println(block.Header.nonce)
+		for i :=0; i < 4000000000; i++ {
+			sha, _ := block.Header.BlockSha()
 
 			if lessThanDiff(sha, difficulty) {
 				fmt.Println("valid hash")
-				err := client.SubmitBlock(btcutil.NewBlock(block), nil)
+				client.SubmitBlock(btcutil.NewBlock(block), nil)
 				break
-			}
-			else {
-				block.Header.nonce += 1
+			}else {
+				block.Header.Nonce += 1
 			}
 		}
 
